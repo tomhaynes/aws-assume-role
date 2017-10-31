@@ -44,10 +44,5 @@ Gem::Specification.new do |spec|
     spec.add_development_dependency "simplecov", "~> 0.13"
     spec.add_development_dependency "webmock", "~> 2.3"
 
-    case Gem::Platform.local.os
-    when "linux"
-        spec.add_dependency "gir_ffi-gnome_keyring", "~> 0.0", ">= 0.0.3"
-    when "darwin"
-        spec.add_dependency "ruby-keychain", "~> 0.3", ">= 0.3.2"
-    end
+    spec.add_dependency "ruby-keychain", "~> 0.3", ">= 0.3.2"
 end
