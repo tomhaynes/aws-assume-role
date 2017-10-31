@@ -31,26 +31,26 @@ module AwsAssumeRole::Store::Keyring
     def keyring(backend = AwsAssumeRole::Config.backend)
         keyrings[backend] ||= begin
             try_backend_plugin
-            klass = backend ? "Keyring::Backend::#{backend}".constantize : nil
+            klass = backend ? "::Keyring::Backend::#{backend}".constantize.new : nil
             logger.debug "Initializing #{klass} backend"
             ::Keyring.new(klass)
         end
     end
 
-    def fetch(id, backend: nil)
+    def fetch(id, backend: AwsAssumeRole::Config.backend)
         logger.debug "Fetching #{id} from keyring"
         fetched = keyring(backend).get_password(KEYRING_KEY, id)
         raise Aws::Errors::NoSuchProfileError if fetched == "null" || fetched.nil? || !fetched
         JSON.parse(fetched, symbolize_names: true)
     end
 
-    def delete_credentials(id, backend: nil)
+    def delete_credentials(id, backend: AwsAssumeRole::Config.backend)
         semaphore.synchronize do
             keyring(backend).delete_password(KEYRING_KEY, id)
         end
     end
 
-    def save_credentials(id, credentials, expiration: nil, backend: nil)
+    def save_credentials(id, credentials, expiration: nil, backend: AwsAssumeRole::Config.backend)
         credentials_to_persist = Serialization.credentials_to_hash(credentials)
         credentials_to_persist[:expiration] = expiration if expiration
         semaphore.synchronize do
